@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="App para dibujar Árboles">
+    <meta name="author" content="Rigoberto Acifuina">
+    <title>Árboles by Rigoberto Acifuina</title>
+    <link href="./css/bootstrap-material-design.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/Treant.css">
+
+    <style>
+        body,
+        div,
+        dl,
+        dt,
+        dd,
+        ul,
+        ol,
+        li,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        pre,
+        form,
+        fieldset,
+        input,
+        textarea,
+        p,
+        blockquote,
+        th,
+        td {
+            margin: 0;
+            padding: 0;
+        }
+
+        footer {
+            bottom: 0px;
+            position: absolute;
+            width: 100%;
+            background: purple;
+            padding: 4px;
+            color: white;
+            text-align: center;
+            font-family: helvetica, arial;
+        }
+
+        body {
+            padding-top: 1rem;
+        }
+
+        .chart {
+            background: #FFFFFF;
+            height: calc(100vh - 170px);
+            overflow: scroll;
+        }
+
+        .node {
+            color: #0069c0;
+            background: #e5e5e5;
+            border: 1px solid #0069c0;
+            border-radius: 50px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        .root {
+            color: #0069c0;
+            background: #e5e5e5;
+            border: 2px solid #0069c0;
+            border-radius: 50px;
+            vertical-align: middle;
+        }
+
+        .node p {
+            font-size: 25px;
+            line-height: 50px;
+            width: 50px;
+            height: 50px;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: baseline;
+        }
+
+        .selected {
+            box-shadow: 5px 10px 18px #888888;
+            color: #FFFFFF;
+            background: #0069c0;
+        }
+
+        .root:hover {
+            color: #FFFFFF;
+            background: #0069c0;
+        }
+
+        .custom-node:hover {
+            color: #FFFFFF;
+            background: #0069c0;
+        }
+
+        .badge {
+            font-size: 140%;
+        }
+
+    </style>
+</head>
+
+<body>
+    <main role="main" class="container-fluid">
+        <div class="row">
+            <div class="col-3">
+                <div class="form-group">
+                    <input autofocus type="text" class="form-control number-input" id="tree-level-input" placeholder="Nivel del árbol">
+                </div>
+            </div>
+            <div class="col-3">
+                <button class="btn btn-primary btn-lg btn-block" id="draw-button" onclick="drawNewTree()">Dibujar</button>
+            </div>
+            <div class="col-3">
+            </div>
+            <div class="col-3">
+                <button class="btn btn-outline-warning btn-lg btn-block" id="random-button" onclick="randomTree()">Random</button>
+            </div>
+        </div>
+        <hr>
+    </main>
+    <main class="container-fluid">
+        <div class="row">
+            <div class="col-8" id="wrap">
+                <div class="chart card" id="chart-div">
+                </div>
+            </div>
+            <div class="col-4 ">
+                <ul class="list-group card">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Altura del árbol
+                        <span class="badge badge-primary badge-pill" id="tree-height">N/A</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Nivel del árbol
+                        <span class="badge badge-primary badge-pill" id="tree-level">N/A</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Grado del árbol
+                        <span class="badge badge-primary badge-pill" id="tree-grade">N/A</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Peso del árbol
+                        <span class="badge badge-primary badge-pill" id="tree-weight">N/A</span>
+                    </li>
+                    <hr>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Nivel del nodo
+                        <span class="badge badge-primary badge-pill" id="node-level">N/A</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Grado del nodo
+                        <span class="badge badge-primary badge-pill" id="node-grade">N/A</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Profundidad del nodo
+                        <span class="badge badge-primary badge-pill" id="node-depth">N/A</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <footer>
+        Desarrollado por <a href="http://rigoberto.acifuina.com" style="color: white;">Rigoberto Acifuina</a> <small>5190-14-207</small>
+        <br>
+        <small>Proyecto final del curso Matemática Discreta Sección "E" 2019</small>
+    </footer>
+    <script src="./js/jquery-3.3.1.slim.min.js"></script>
+    <script src="./js/spin.min.js"></script>
+    <script src="./js/popper.js"></script>
+    <script src="./js/bootstrap-material-design.js"></script>
+    <script src="./js/raphael.js"></script>
+    <script src="./js/Treant.js"></script>
+    <script>
+        var spinner;
+        var target = document.getElementById('wrap');
+        var opts = {
+            lines: 13,
+            length: 28,
+            width: 15,
+            radius: 42,
+            scale: 1,
+            corners: 1,
+            color: '#000',
+            opacity: 0.25,
+            rotate: 0,
+            direction: 1,
+            speed: 1,
+            trail: 60,
+            fps: 20,
+            zIndex: 2e9,
+            className: 'spinner',
+            top: '50%',
+            left: '50%',
+            shadow: false,
+            hwaccel: false,
+            position: 'absolute'
+        }
+
+
+        const GRADE_THRESHOLD = 3;
+        var identifiers = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+        var identifiersIndex = -1;
+        var previousSelection;
+
+        function getNextIdentifier() {
+            identifiersIndex++;
+            identifiersIndex < identifiers.length ? identifiersIndex = identifiersIndex : identifiersIndex = 0;
+            return identifiers[identifiersIndex];
+        }
+
+        $(".number-input").keypress(function(evt) {
+            if (evt.target.value.length > 0) {
+                return (event.charCode >= 48 && event.charCode <= 57) && evt.target.value.length < 9
+            } else {
+                return (event.charCode >= 49 && event.charCode <= 57) && evt.target.value.length < 9
+            }
+        });
+
+        function drawNewTree() {
+            var treeLevel = parseInt($("#tree-level-input").val());
+
+            if (!treeLevel) {
+                $("#tree-level-input").focus();
+                alert("Debes ingresar un nivel para generar el arbol")
+                return;
+            }
+
+            spinner = new Spinner(opts).spin(target);
+            setTimeout(function() {
+                var treeGrade = 0;
+                let treeHeight = treeLevel + 1;
+                let treeWeight = treeLevel;
+                var children = [];
+
+                var config = {
+                    container: "#chart-div",
+                    connectors: {
+                        type: "straight",
+                        style: {
+                            "stroke": "#616161",
+                            "stroke-opacity": 0.54,
+                            "arrow-end": "wide-narrow-midium",
+                            "stroke-width": 2
+                        }
+                    }
+                };
+
+                var currentLevel = 0;
+                var parents = [];
+                var atLeastOne = false;
+                while (currentLevel <= treeLevel) {
+                    var isLastRow = (currentLevel == treeLevel);
+                    var nextParents = [];
+                    if (parents.length) {
+                        parents.forEach(parent => {
+                            for (var index = 0; index < parent.text["data-grade"]; index++) {
+                                var nodeGrade = isLastRow ? 0 : atLeastOne ? Math.floor(Math.random() * GRADE_THRESHOLD) : Math.floor(Math.random() * GRADE_THRESHOLD) + 1;
+                                atLeastOne = true;
+                                nodeGrade > treeGrade ? treeGrade = nodeGrade : treeGrade = treeGrade;
+                                var node = {
+                                    parent: parent,
+                                    text: {
+                                        name: getNextIdentifier(),
+                                        "data-parent": parent.text.name,
+                                        "data-level": currentLevel,
+                                        "data-depth": currentLevel,
+                                        "data-grade": nodeGrade
+                                    },
+                                    "HTMLclass": "custom-node"
+                                };
+                                nextParents.push(node);
+                                children.push(node);
+                            }
+                        });
+                    } else {
+                        var nodeGrade = isLastRow ? 0 : atLeastOne ? Math.floor(Math.random() * GRADE_THRESHOLD) : Math.floor(Math.random() * GRADE_THRESHOLD) + 1;
+                        atLeastOne = true;
+                        nodeGrade > treeGrade ? treeGrade = nodeGrade : treeGrade = treeGrade;
+                        var node = {
+                            text: {
+                                name: getNextIdentifier(),
+                                "data-level": currentLevel,
+                                "data-depth": currentLevel,
+                                "data-grade": nodeGrade
+                            },
+                            "HTMLclass": "root"
+                        };
+                        nextParents.push(node);
+                        children.push(node);
+                    }
+                    parents = nextParents;
+                    currentLevel++;
+                    atLeastOne = false;
+                }
+
+                var simple_chart_config = [config];
+
+                children.forEach(child => {
+                    simple_chart_config.push(child);
+                })
+                new Treant(simple_chart_config);
+
+                $(".custom-node").on("click", function() {
+                    previousSelection ? previousSelection.removeClass("selected") : null;
+                    $(this).addClass("selected");
+                    previousSelection = $(this);
+                    $("#node-grade").text($(this).data("grade"));
+                    $("#node-level").text($(this).data("level"));
+                    $("#node-depth").text($(this).data("depth"));
+                });
+                $(".root").on("click", function() {
+                    previousSelection ? previousSelection.removeClass("selected") : null;
+                    $(this).addClass("selected");
+                    previousSelection = $(this);
+                    $("#node-grade").text($(this).data("grade"));
+                    $("#node-level").text($(this).data("level"));
+                    $("#node-depth").text($(this).data("depth"));
+                });
+                spinner.stop();
+                $("#node-grade").text("N/A");
+                $("#node-level").text("N/A");
+                $("#node-depth").text("N/A");
+
+                $("#tree-height").text(treeHeight);
+                $("#tree-level").text(treeLevel);
+                $("#tree-grade").text(treeGrade);
+                $("#tree-weight").text(treeWeight);
+            }, 50);
+        }
+
+        function randomTree() {
+            var treeLevel = Math.floor(Math.random() * 5) + 1;
+            $("#tree-level-input").val(treeLevel)
+            drawNewTree();
+        }
+
+    </script>
+
+</body>
+
+</html>
