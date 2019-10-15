@@ -331,6 +331,14 @@
                 $("#node-level").text("N/A");
                 $("#node-depth").text("N/A");
 
+                if (treeLevel > 5) {
+                    var zoom = 100 - (treeLevel * 5)
+                    zoom < 20 ? zoom = 20 : zoom = zoom;
+                    $(".chart > *").css("zoom", zoom + "%");
+                } else {
+                    $(".chart > *").css("zoom", "100%");
+                }
+
                 $("#tree-height").text(treeHeight);
                 $("#tree-level").text(treeLevel);
                 $("#tree-grade").text(treeGrade);
